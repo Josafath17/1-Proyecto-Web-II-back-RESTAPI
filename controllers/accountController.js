@@ -7,9 +7,82 @@ const User = require("../models/userModel");
  * @param {*} req
  * @param {*} res
  */
+const addplaylsit = async (req, res) => {
+  if (req.query && req.query.id) {
+    if (req.body.playlist) {
+      Account.findById(req.query.id)
+        .then((account) => {
+          console.log(account.playlists);
+          let playlists = account.playlists;
+          playlists.push(req.body.playlist);
+          res.status(201);
+          res.json(account);
+        })
+        .catch((err) => {
+          res.status(404);
+          res.json({ error: "account doesnt exist", err });
+        });
+    } else {
+      res.status(422);
+      console.log("error while saving the account");
+      res.json({
+        error: "No valid data provided for account",
+      });
+    }
+  } else {
+    res.status(422);
+    console.log("error while saving the account");
+    res.json({
+      error: "No valid data provided for account",
+    });
+  }
+};
+
+/**
+ * Creates a account
+ *
+ * @param {*} req
+ * @param {*} res
+ */
+const deletedplaylist = async (req, res) => {
+  if (req.query && req.query.id) {
+    if (req.body.playlist) {
+      Account.findById(req.query.id)
+        .then((account) => {
+          console.log(account.playlists);
+          let playlists = account.playlists;
+          playlists.filter((playlist) => playlist !== req.body.playlist);
+          res.status(200);
+          res.json(account);
+        })
+        .catch((err) => {
+          res.status(404);
+          res.json({ error: "account doesnt exist", err });
+        });
+    } else {
+      res.status(422);
+      console.log("error while saving the account");
+      res.json({
+        error: "No valid data provided for account",
+      });
+    }
+  } else {
+    res.status(422);
+    console.log("error while saving the account");
+    res.json({
+      error: "No valid data provided for account",
+    });
+  }
+};
+
+/**
+ * Creates a account
+ *
+ * @param {*} req
+ * @param {*} res
+ */
 const accountPost = async (req, res) => {
   const account = new Account();
-
 
   account.firstName = req.body.firstName;
   account.pin = req.body.pin;
@@ -20,37 +93,41 @@ const accountPost = async (req, res) => {
   const user = await User.findById(req.body.user);
 
   //validador de ping
-  if (account.firstName && account.pin && account.age && !!user) {
-
+  if (
+    account.firstName &&
+    req.body.pin.length === 6 &&
+    account.pin &&
+    account.age &&
+    !!user
+  ) {
     const validadordepin = req.body.pin.toString().length == 6;
     if (!validadordepin) {
       res.json({ error: "the pin is longer" });
       return;
     }
 
-
-    await account.save()
-      .then(data => {
+    await account
+      .save()
+      .then((data) => {
         res.status(201); // CREATED
         res.header({
-          'location': `/api/account/?id=${data.id}`
+          location: `/api/account/?id=${data.id}`,
         });
         res.json(data);
       })
-      .catch(err => {
+      .catch((err) => {
         res.status(422);
-        console.log('error while saving the account', err);
+        console.log("error while saving the account", err);
         res.json({
           error_code: 1233,
-          error: 'There was an error saving the account'
+          error: "There was an error saving the account",
         });
       });
   } else {
-
     res.status(422);
-    console.log('error while saving the account')
+    console.log("error while saving the account");
     res.json({
-      error: 'No valid data provided for account'
+      error: "No valid data provided for account",
     });
   }
 };
@@ -63,50 +140,46 @@ const accountPost = async (req, res) => {
  */
 const accountGet = (req, res) => {
   // if an specific account is required
-  if (req.query && req.query.id || req.query.userid) {
+  if ((req.query && req.query.id) || req.query.userid) {
     if (req.query.id) {
-
       Account.findById(req.query.id)
 
-        .then(account => {
+        .then((account) => {
           res.status(200);
           res.json(account);
         })
-        .catch(err => {
+        .catch((err) => {
           res.status(404);
-          res.json({ error: "account doesnt exist", err })
-
+          res.json({ error: "account doesnt exist", err });
         });
-    }
-
-    else if (req.query.userid) {
+    } else if (req.query.userid) {
       Account.find()
-        .then(accounts => {
-          const account = accounts.filter(account => account.user == req.query.userid)
+        .then((accounts) => {
+          const account = accounts.filter(
+            (account) => account.user == req.query.userid
+          );
           res.json(account);
         })
-        .catch(err => {
+        .catch((err) => {
           res.status(422);
-          res.json({ "error": err });
+          res.json({ error: err });
         });
     } else {
       res.status(422);
-      res.json({ "error": "No se encontro el userid" });
-
+      res.json({ error: "No se encontro el userid" });
     }
-
   } else {
     // get all accounts
     Account.find()
-      .then(accounts => {
+      .then((accounts) => {
         res.json(accounts);
       })
-      .catch(err => {
+      .catch((err) => {
         res.status(422);
-        res.json({ "error": err });
+        res.json({ error: err });
       });
   }
-}
+};
 
 /**
  * Delete one account
@@ -120,8 +193,8 @@ const accountDelete = (req, res) => {
     Account.findById(req.query.id, function (err, account) {
       if (err || !account) {
         res.status(500);
-        console.log('error while queryting the account', err)
-        res.json({ error: "account doesnt exist" })
+        console.log("error while queryting the account", err);
+        res.json({ error: "account doesnt exist" });
         return;
       }
 
@@ -129,9 +202,9 @@ const accountDelete = (req, res) => {
       account.deleteOne(function (err) {
         if (err) {
           res.status(422);
-          console.log('error while deleting the account', err)
+          console.log("error while deleting the account", err);
           res.json({
-            error: 'There was an error deleting the account'
+            error: "There was an error deleting the account",
           });
         }
         res.status(204); //No content
@@ -140,7 +213,7 @@ const accountDelete = (req, res) => {
     });
   } else {
     res.status(404);
-    res.json({ error: "Account doesnt exist" })
+    res.json({ error: "Account doesnt exist" });
   }
 };
 
@@ -156,19 +229,19 @@ const accountPatch = (req, res) => {
     Account.findById(req.query.id, function (err, account) {
       if (err || !account) {
         res.status(404);
-        console.log('error while queryting the account', err)
-        res.json({ error: "account doesnt exist" })
-        return
+        console.log("error while queryting the account", err);
+        res.json({ error: "account doesnt exist" });
+        return;
       }
 
       // update the account object (patch)
 
       account.pin = req.body.pin ? req.body.pin : account.pin;
-      account.firstName = req.body.firstName ? req.body.firstName : account.firstName;
+      account.firstName = req.body.firstName
+        ? req.body.firstName
+        : account.firstName;
       account.avatar = req.body.avatar ? req.body.avatar : account.avatar;
       account.age = req.body.age ? req.body.age : account.age;
-      
-
 
       // update the account object (put)
       // account.title = req.body.title
@@ -177,9 +250,9 @@ const accountPatch = (req, res) => {
       account.save(function (err) {
         if (err) {
           res.status(422);
-          console.log('error while saving the account', err)
+          console.log("error while saving the account", err);
           res.json({
-            error: 'There was an error saving the account'
+            error: "There was an error saving the account",
           });
         }
         res.status(200); // OK
@@ -188,13 +261,15 @@ const accountPatch = (req, res) => {
     });
   } else {
     res.status(404);
-    res.json({ error: "account doesnt exist" })
+    res.json({ error: "account doesnt exist" });
   }
 };
 
 module.exports = {
+  addplaylsit,
+  deletedplaylist,
   accountGet,
   accountPost,
   accountPatch,
-  accountDelete
-}
+  accountDelete,
+};
