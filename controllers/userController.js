@@ -10,7 +10,7 @@ const User = require("../models/userModel");
 const confirmuser = async (req, res) => {
   if (req.query && req.query.id) {
     const user = await User.findById(req.query.id);
-    if (user.state === "waititng") {
+    if (user.state == "waiting") {
       user.state = "confirm";
       user
         .save()
@@ -26,7 +26,7 @@ const confirmuser = async (req, res) => {
           });
         });
     } else {
-      res.state(404);
+      res.status(404);
       res.json({ error: "user doesnt exist" });
     }
   } else {

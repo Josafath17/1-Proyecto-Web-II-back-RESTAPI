@@ -1,3 +1,7 @@
+require("dotenv").config();
+const jwt = require("jsonwebtoken");
+const User = require("./models/userModel");
+
 const express = require("express");
 const app = express();
 // database connection
@@ -7,6 +11,8 @@ const db = mongoose.connect("mongodb://127.0.0.1:27017/proyecto2", {
   useFindAndModify: false,
   useUnifiedTopology: true,
 });
+
+const theSecretKey = process.env.JWT_SECRET;
 
 const {
   addplaylsit,
@@ -41,6 +47,7 @@ const {
 
 // parser for the request body (required for the POST and PUT methods)
 const bodyParser = require("body-parser");
+
 app.use(bodyParser.json());
 
 // check for cors
@@ -51,6 +58,75 @@ app.use(
     methods: "*",
   })
 );
+
+app.patch("/api/usersconfirm", confirmuser);
+app.post("/api/users", userPost);
+
+// login with JWT
+app.post("/api/session", function (req, res) {
+  User.find({ state: "confirm" })
+    .then(async (users) => {
+      const user = users.filter(
+        (user) =>
+          user.username === req.body.username &&
+          user.password === req.body.password
+      );
+      if (!user) {
+        res.status(422);
+        res.json({ error: "Invalid username or password" });
+        return;
+      }
+      const data = user[0];
+      const token = jwt.sign(
+        {
+          id: data._id,
+          name: data.name,
+          permission: ["create", "edit", "delete"],
+          pin: data.pin,
+          lastName: data.lastName,
+        },
+        theSecretKey
+      );
+
+      res.status(201);
+      res.json(token);
+    })
+    .catch((err) => {
+      res.status(500);
+      res.json({ "Internal server error": err });
+    });
+});
+
+// JWT Authentication middleware
+app.use(function (req, res, next) {
+  if (req.headers["authorization"]) {
+    const authToken = req.headers["authorization"].split(" ")[1];
+    try {
+      jwt.verify(authToken, theSecretKey, (err, decodedToken) => {
+        if (err || !decodedToken) {
+          res.status(401);
+          res.send({
+            error: "Unauthorized",
+          });
+          return;
+        }
+        next();
+      });
+    } catch (e) {
+      console.error("There was an error", e);
+      res
+        .send({
+          error: "Unauthorized ",
+        })
+        .status(401);
+    }
+  } else {
+    res.status(401);
+    res.send({
+      error: "Unauthorized ",
+    });
+  }
+});
 
 // listen to the task request
 app.post("/api/accountsplaylists", addplaylsit);
@@ -67,9 +143,7 @@ app.patch("/api/playlists", playlistPatch);
 app.put("/api/playlists", playlistPatch);
 app.delete("/api/playlists", playlistDelete);
 
-app.post("/api/usersconfirm", confirmuser);
 app.get("/api/users", userGet);
-app.post("/api/users", userPost);
 app.patch("/api/users", userPatch);
 app.put("/api/users", userPatch);
 app.delete("/api/users", userDelete);
