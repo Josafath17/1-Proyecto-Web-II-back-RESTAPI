@@ -4,6 +4,7 @@ const User = require("./models/userModel");
 
 const express = require("express");
 const app = express();
+
 // database connection
 const mongoose = require("mongoose");
 const db = mongoose.connect("mongodb://127.0.0.1:27017/proyecto2", {
@@ -11,6 +12,30 @@ const db = mongoose.connect("mongodb://127.0.0.1:27017/proyecto2", {
   useFindAndModify: false,
   useUnifiedTopology: true,
 });
+
+const nodemailer = require("nodemailer");
+
+const transporter = nodemailer.createTransport({
+  host: "smtp.gmail.com",
+  port: 465,
+  secure: true,
+  auth: {
+    user: process.env.USER,
+    pass: process.env.PASS,
+  },
+  tls: {
+    rejectUnauthorized: false,
+  },
+});
+
+transporter
+  .verify()
+  .then(() => {
+    console.log("Ready for send emails");
+  })
+  .catch((err) => {
+    console.log({ Error: err });
+  });
 
 const theSecretKey = process.env.JWT_SECRET;
 
@@ -60,7 +85,42 @@ app.use(
 );
 
 app.patch("/api/usersconfirm", confirmuser);
-app.post("/api/users", userPost);
+
+app.post("/api/users", (req, res) => {
+  userPost(req, res)
+    .then(async (response) => {
+      if (response) {
+        const mailoptions = {
+          from: "TubeKids Pro",
+          to: response.username,
+          subject: "Confirm Account",
+          text: "Confirm Account!",
+          html: `
+          <div style="display: flex; justify-content: center; padding-top: 1rem;">
+            <a
+              href="http://localhost:3000/ConfirmAccount/${response.id}"
+              style="background-color: #00BFA6; color: #fff; padding: 14px 40px; border-radius: 10px; border: 2px dashed #00BFA6; cursor: pointer; text-transform: uppercase; font-size: 1.2rem; transition: .4s; box-shadow: rgba(50, 50, 93, 0.25) 0px 2px 5px -1px, rgba(0, 0, 0, 0.3) 0px 1px 3px -1px;"
+              onmouseover="this.style.backgroundColor='#fff'; this.style.color='#00BFA6';  this.style.transition='.4s'; this.style.border='2px dashed #00BFA6';"
+              onmouseout="this.style.backgroundColor='#00BFA6'; this.style.color='#fff'; this.style.transition='.4s'; this.style.border='2px dashed #00BFA6';"
+            >
+            Confirm Account
+            </a>
+          </div>
+        `,
+        };
+        await transporter.sendMail(mailoptions, (error, info) => {
+          if (error) {
+            console.log(error);
+          }
+          console.log(info)
+        });
+        console.log("exito?");
+      }
+    })
+    .catch((error) => {
+      console.error("Hubo un error en la operación de usuario:", error);
+    });
+});
 
 // login with JWT
 app.post("/api/session", function (req, res) {

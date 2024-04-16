@@ -42,6 +42,7 @@ const confirmuser = async (req, res) => {
  * @param {*} res
  */
 const userPost = async (req, res) => {
+  let devolver;
   const user = new User();
 
   user.username = req.body.username;
@@ -54,7 +55,6 @@ const userPost = async (req, res) => {
   user.birth_date = req.body.birth_date;
   user.state = "waiting";
 
-  console.log(user);
   if (
     user.username &&
     user.password &&
@@ -69,10 +69,10 @@ const userPost = async (req, res) => {
   ) {
     //validar Email /username
     const validEmail = async (email) => {
-      const validEmail = await User.findOne({ username: email });
+      /* const validEmail = await User.findOne({ username: email });
       if (validEmail) {
         return { valid: false, error: "Invalid email" };
-      }
+      } */
 
       const emailFormat = /^\S+@\S+\.\S+$/;
       if (!emailFormat.test(email)) {
@@ -111,8 +111,8 @@ const userPost = async (req, res) => {
         res.header({
           location: `/api/users/?id=${data.id}`,
         });
-
         res.json(data);
+        devolver = data;
       })
       .catch((err) => {
         res.status(422);
@@ -129,6 +129,7 @@ const userPost = async (req, res) => {
       error: "No valid data provided for user",
     });
   }
+  return devolver;
 };
 
 /**
