@@ -69,10 +69,10 @@ const userPost = async (req, res) => {
   ) {
     //validar Email /username
     const validEmail = async (email) => {
-      /* const validEmail = await User.findOne({ username: email });
+      const validEmail = await User.findOne({ username: email });
       if (validEmail) {
         return { valid: false, error: "Invalid email" };
-      } */
+      }
 
       const emailFormat = /^\S+@\S+\.\S+$/;
       if (!emailFormat.test(email)) {

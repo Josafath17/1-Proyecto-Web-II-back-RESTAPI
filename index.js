@@ -5,6 +5,9 @@ const User = require("./models/userModel");
 const express = require("express");
 const app = express();
 
+const accountSid = process.env.TWILIO_SID;
+const authToken = process.env.TWILIO_AUTH_TOKEN;
+const client = require("twilio")(accountSid, authToken);
 // database connection
 const mongoose = require("mongoose");
 const db = mongoose.connect("mongodb://127.0.0.1:27017/proyecto2", {
@@ -93,8 +96,8 @@ app.post("/api/users", (req, res) => {
         const mailoptions = {
           from: "TubeKids Pro",
           to: response.username,
-          subject: "Confirm Account",
-          text: "Confirm Account!",
+          subject: "Confirm Your Account for TubeKids",
+          text: "Confirm Account her",
           html: `
           <div style="display: flex; justify-content: center; padding-top: 1rem;">
             <a
@@ -112,7 +115,7 @@ app.post("/api/users", (req, res) => {
           if (error) {
             console.log(error);
           }
-          console.log(info)
+          console.log(info);
         });
         console.log("exito?");
       }
@@ -131,12 +134,23 @@ app.post("/api/session", function (req, res) {
           user.username === req.body.username &&
           user.password === req.body.password
       );
-      if (!user) {
+      if (!user.length) {
         res.status(422);
         res.json({ error: "Invalid username or password" });
         return;
       }
       const data = user[0];
+      await client.verify.v2
+        .services("VAcf60850c68a75788365d76c7df47e4bf")
+        .verifications.create({
+          to: "+50687169595",
+          channel: "sms",
+        })
+        .then((verification) => {
+          console.log(verification.sid);
+          return;
+        });
+
       const token = jwt.sign(
         {
           id: data._id,
@@ -147,7 +161,6 @@ app.post("/api/session", function (req, res) {
         },
         theSecretKey
       );
-
       res.status(201);
       res.json(token);
     })
