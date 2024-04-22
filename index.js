@@ -117,7 +117,6 @@ app.post("/api/users", (req, res) => {
           }
           console.log(info);
         });
-        console.log("exito?");
       }
     })
     .catch((error) => {
@@ -140,21 +139,21 @@ app.post("/api/session", function (req, res) {
         return;
       }
       const data = user[0];
-      await client.verify.v2
-        .services("VAcf60850c68a75788365d76c7df47e4bf")
-        .verifications.create({
-          to: "+50687169595",
-          channel: "sms",
-        })
-        .then((verification) => {
-          console.log(verification.sid);
-          return;
-        });
+      // await client.verify.v2
+      //   .services("VAcf60850c68a75788365d76c7df47e4bf")
+      //   .verifications.create({
+      //     to: "+50687169595",
+      //     channel: "sms",
+      //   })
+      //   .then((verification) => {
+      //     console.log(verification.sid);
+      //     return;
+      //   });
 
       const token = jwt.sign(
         {
           id: data._id,
-          name: data.name,
+          firstName: data.firstName,
           permission: ["create", "edit", "delete"],
           pin: data.pin,
           lastName: data.lastName,
@@ -168,6 +167,61 @@ app.post("/api/session", function (req, res) {
       res.status(500);
       res.json({ "Internal server error": err });
     });
+});
+
+// Autentica al usuario
+app.post("/api/authorization", function (req, res) {
+  const authToken = req.headers["authorization"].split(" ")[1];
+  try {
+    jwt.verify(authToken, theSecretKey, async (err, decodedToken) => {
+      if (err || !decodedToken) {
+        res.status(401);
+        res.send({
+          error: "Unauthorized",
+        });
+        return;
+      }
+      if (!req.body.code) {
+        res.status(404);
+        res.json({
+          error: "Code is required",
+        });
+        return;
+      }
+      try {
+        console.log("sms");
+        const verifySid = "VAcf60850c68a75788365d76c7df47e4bf";
+        // await client.verify.v2
+        //   .services(verifySid)
+        //   .verificationChecks.create({
+        //     to: "+50687169595",
+        //     code: req.body.code,
+        //   })
+        //   .then((verification_check) => {
+        //     console.log(verification_check.status);
+        //     if (verification_check.status !== "approved") {
+        //       throw new Error("codigo invalido");
+        //     }
+        //   });
+
+        const token = jwt.sign(decodedToken, theSecretKey);
+        console.log("si!");
+        res.status(201);
+        res.json({ token: token, user: decodedToken });
+        return;
+      } catch (error) {
+        res.status(404);
+        res.json({ error: error });
+        return;
+      }
+    });
+  } catch (e) {
+    console.error("There was an error", e);
+    res.status(401);
+    res.send({ error: "Unauthorized" });
+
+    return;
+  }
 });
 
 // JWT Authentication middleware
