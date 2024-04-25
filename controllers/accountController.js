@@ -2,11 +2,13 @@ const Account = require("../models/accountModel");
 const User = require("../models/userModel");
 
 /**
- * Creates a account
+ * Creates a playlist
  *
  * @param {*} req
  * @param {*} res
  */
+
+//Agregar una playlist
 const addplaylsit = async (req, res) => {
   if (req.query && req.query.id) {
     if (req.body.playlist) {
@@ -47,11 +49,13 @@ const addplaylsit = async (req, res) => {
 };
 
 /**
- * Creates a account
+ * Borrar Playlist
  *
  * @param {*} req
  * @param {*} res
  */
+
+//borrarplaylist
 const deletedplaylist = async (req, res) => {
   if (req.query && req.query.id) {
     if (req.body.playlist) {

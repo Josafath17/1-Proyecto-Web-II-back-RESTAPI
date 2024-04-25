@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
-
+//se aprego el numero de telefono y estatus
 const user = new Schema({
   username: { type: String },
   password: { type: String },

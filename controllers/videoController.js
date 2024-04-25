@@ -7,19 +7,7 @@ const Playlist = require("../models/playlistModel");
  * @param {*} req
  * @param {*} res
  */
-/* function verificadorURL(url) {
-  const urls =
-    /^(?:(?:https?:)?\/\/)?(?:www\.)?(?:youtube\.com\/(?:[^\/\n\s]+\/\S+\/|(?:v|e(?:mbed)?)\/|\S*?[?&]v=)|youtu\.be\/)([a-zA-Z0-9_-]{11})/;
-  return urls.test(url);
-}
 
-const validadorurl= verificadorURL(req.body.url);
- */
-/*   if(!validadorurl){
-    res.status(400);
-    res.json({error: "Invalid video URL"});
-    return;
-  } */
 
 const videoPost = async (req, res) => {
   var video = new Video();

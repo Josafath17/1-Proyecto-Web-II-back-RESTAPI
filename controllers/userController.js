@@ -2,11 +2,12 @@ const { response } = require("express");
 const User = require("../models/userModel");
 
 /**
- * Creates a user
+ * Confirmar Usuario
  *
  * @param {*} req
  * @param {*} res
  */
+//confirmador de usuario con pendiente
 const confirmuser = async (req, res) => {
   if (req.query && req.query.id) {
     const user = await User.findById(req.query.id);
