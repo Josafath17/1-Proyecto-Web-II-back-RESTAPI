@@ -12,11 +12,19 @@ const addplaylsit = async (req, res) => {
     if (req.body.playlist) {
       Account.findById(req.query.id)
         .then((account) => {
-          console.log(account.playlists);
           let playlists = account.playlists;
           playlists.push(req.body.playlist);
-          res.status(201);
-          res.json(account);
+          account.save(function (err) {
+            if (err) {
+              res.status(422);
+              console.log("error while saving the account", err);
+              res.json({
+                error: "There was an error saving the account",
+              });
+            }
+            res.status(200); // OK
+            res.json(account);
+          });
         })
         .catch((err) => {
           res.status(404);
@@ -50,10 +58,19 @@ const deletedplaylist = async (req, res) => {
       Account.findById(req.query.id)
         .then((account) => {
           console.log(account.playlists);
-          let playlists = account.playlists;
-          playlists.filter((playlist) => playlist !== req.body.playlist);
-          res.status(200);
-          res.json(account);
+          let playlists = account.playlists.filter((playlist) => playlist !== req.body.playlist);
+          account.playlists = playlists
+          account.save(function (err) {
+            if (err) {
+              res.status(422);
+              console.log("error while saving the account", err);
+              res.json({
+                error: "There was an error saving the account",
+              });
+            }
+            res.status(200); // OK
+            res.json(account);
+          });
         })
         .catch((err) => {
           res.status(404);

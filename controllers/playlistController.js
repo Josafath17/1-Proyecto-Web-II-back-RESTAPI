@@ -10,6 +10,7 @@ const User = require("../models/userModel");
 const playlistPost = async (req, res) => {
   const playlist = new Playlist();
   playlist.user = req.body.user;
+  playlist.name = req.body.name;
 
   const user = await User.findById(req.body.user);
 

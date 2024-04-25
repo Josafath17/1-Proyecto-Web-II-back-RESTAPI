@@ -26,7 +26,7 @@ const videoPost = async (req, res) => {
 
   video.name = req.body.name;
   video.url = req.body.url;
-  video.description = req.body.description;
+  video.description = req.body.description ? req.body.description : "";
   video.playlist = req.body.playlist;
   const playlist = await Playlist.findById(req.body.playlist);
 
@@ -157,9 +157,7 @@ const videoPatch = (req, res) => {
       // update the video object (patch)
       video.name = req.body.name ? req.body.name : video.name;
       video.url = req.body.url ? req.body.url : video.url;
-      video.description = req.body.description
-        ? req.body.description
-        : video.description;
+      video.description = req.body.description ? req.body.description : "";
       // update the video object (put)
       // video.title = req.body.title
       // video.detail = req.body.detail

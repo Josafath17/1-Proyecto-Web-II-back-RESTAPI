@@ -101,7 +101,7 @@ app.post("/api/users", (req, res) => {
           html: `
           <div style="display: flex; justify-content: center; padding-top: 1rem;">
             <a
-              href="http://localhost:3000/ConfirmAccount/${response.id}"
+              href="http://localhost:302/ConfirmAccount/${response.id}"
               style="background-color: #00BFA6; color: #fff; padding: 14px 40px; border-radius: 10px; border: 2px dashed #00BFA6; cursor: pointer; text-transform: uppercase; font-size: 1.2rem; transition: .4s; box-shadow: rgba(50, 50, 93, 0.25) 0px 2px 5px -1px, rgba(0, 0, 0, 0.3) 0px 1px 3px -1px;"
               onmouseover="this.style.backgroundColor='#fff'; this.style.color='#00BFA6';  this.style.transition='.4s'; this.style.border='2px dashed #00BFA6';"
               onmouseout="this.style.backgroundColor='#00BFA6'; this.style.color='#fff'; this.style.transition='.4s'; this.style.border='2px dashed #00BFA6';"
@@ -139,16 +139,16 @@ app.post("/api/session", function (req, res) {
         return;
       }
       const data = user[0];
-      // await client.verify.v2
-      //   .services("VAcf60850c68a75788365d76c7df47e4bf")
-      //   .verifications.create({
-      //     to: "+50687169595",
-      //     channel: "sms",
-      //   })
-      //   .then((verification) => {
-      //     console.log(verification.sid);
-      //     return;
-      //   });
+      await client.verify.v2
+        .services("VAcf60850c68a75788365d76c7df47e4bf")
+        .verifications.create({
+          to: "+50687169595",
+          channel: "sms",
+        })
+        .then((verification) => {
+          console.log(verification.sid);
+          return;
+        });
 
       const token = jwt.sign(
         {
@@ -191,21 +191,20 @@ app.post("/api/authorization", function (req, res) {
       try {
         console.log("sms");
         const verifySid = "VAcf60850c68a75788365d76c7df47e4bf";
-        // await client.verify.v2
-        //   .services(verifySid)
-        //   .verificationChecks.create({
-        //     to: "+50687169595",
-        //     code: req.body.code,
-        //   })
-        //   .then((verification_check) => {
-        //     console.log(verification_check.status);
-        //     if (verification_check.status !== "approved") {
-        //       throw new Error("codigo invalido");
-        //     }
-        //   });
+        await client.verify.v2
+          .services(verifySid)
+          .verificationChecks.create({
+            to: "+50687169595",
+            code: req.body.code,
+          })
+          .then((verification_check) => {
+            console.log(verification_check.status);
+            if (verification_check.status !== "approved") {
+              throw new Error("codigo invalido");
+            }
+          });
 
         const token = jwt.sign(decodedToken, theSecretKey);
-        console.log("si!");
         res.status(201);
         res.json({ token: token, user: decodedToken });
         return;
