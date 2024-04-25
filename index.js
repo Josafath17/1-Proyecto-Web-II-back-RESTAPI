@@ -74,6 +74,7 @@ const {
 } = require("./controllers/videoController.js");
 
 // parser for the request body (required for the POST and PUT methods)
+//Convetir datos a .json
 const bodyParser = require("body-parser");
 
 app.use(bodyParser.json());
@@ -88,7 +89,7 @@ app.use(
 );
 
 app.patch("/api/usersconfirm", confirmuser);
-
+//Enviar una confirmacion al correo
 app.post("/api/users", (req, res) => {
   userPost(req, res)
     .then(async (response) => {
@@ -124,7 +125,7 @@ app.post("/api/users", (req, res) => {
     });
 });
 
-// login with JWT
+// login con JWT
 app.post("/api/session", function (req, res) {
   User.find({ state: "confirm" })
     .then(async (users) => {
