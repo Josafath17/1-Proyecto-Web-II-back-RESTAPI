@@ -15,3 +15,4 @@
 ## Test
 
 - To test this you can use [postman](https://www.postman.com/) or a simple curl request: `curl http://localhost:3000/hello`
+- LINK DE DIAGRAMA:https://drive.google.com/file/d/1CODGQCPp5cem2SZJ4yyKDbqPHu3pj-7e/view?usp=drive_link
